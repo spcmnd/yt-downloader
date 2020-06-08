@@ -1,20 +1,24 @@
 import tkinter as tk
+import os
 from pytube import YouTube
+from moviepy.editor import *
 
 
 def submit_callback():
     error.pack_forget()
     success.pack_forget()
 
-    try:
-        url = str(yt_url_entry.get())
-        yt = YouTube(url)
-        yt.streams.first().download('./downloads')
-        error.pack_forget()
-        success.pack(side='top', pady=10)
-        yt_url_entry.delete(0, 'end')
-    except:
-        display_error()
+    url = str(yt_url_entry.get())
+    yt = YouTube(url)
+    downloaded_yt = yt.streams.first().download('downloads/')
+    error.pack_forget()
+    success.pack(side='top', pady=10)
+    yt_url_entry.delete(0, 'end')
+    file_path = os.path.join(os.getcwd(), 'downloads', downloaded_yt)
+    base, ext = os.path.splitext(file_path)
+    video = VideoFileClip(file_path)
+    video.audio.write_audiofile(base + '.mp3')
+    os.remove(file_path)
 
 
 def display_error():
@@ -24,7 +28,7 @@ def display_error():
 root = tk.Tk()
 root.title('Youtube Downloader')
 
-canvas = tk.Canvas(root, width=300, height=200, bg='#DBDBDB')
+canvas = tk.Canvas(root, width=400, height=300, bg='#DBDBDB')
 canvas.pack()
 
 frame = tk.Frame(root, bg='#B0B5B3')
