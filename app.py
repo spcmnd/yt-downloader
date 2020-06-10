@@ -9,18 +9,45 @@ CANVAS_WIDTH = 500
 file_size = 0
 
 
+def convert_to_audio(file_path):
+    button['text'] = 'Conversion en mp3...'
+    button['state'] = tk.DISABLED
+    yt_url_entry['state'] = tk.DISABLED
+
+    try:
+        base, ext = os.path.splitext(file_path)
+        video = VideoFileClip(file_path)
+        video.audio.write_audiofile(base + '.mp3')
+        os.remove(file_path)
+    except Exception as e:
+        button_initial_state()
+        display_error()
+        print(e)
+        raise
+
+    yt_url_entry['state'] = tk.NORMAL
+    yt_url_entry.delete(0, tk.END)
+    button_initial_state()
+    display_success()
+
+
 def progress_download(stream=None, chunk=None, bytes_remaining=None):
     percent = (100 * ((file_size - bytes_remaining) / file_size))
-    button['text'] = str(int(percent)) + '% téléchargé...'
+    button['text'] = '{:00.0f}% téléchargé...'.format(percent)
+    return
+
+
+def complete_download(stream=None, chunk=None):
+    button_initial_state()
     return
 
 
 def dest_path_callback():
     path = str(askdirectory())
-    chosen_path_entry.config(state=tk.NORMAL)
+    chosen_path_entry['state'] = tk.NORMAL
     chosen_path_entry.delete(0, tk.END)
     chosen_path_entry.insert(0, path)
-    chosen_path_entry.config(state=tk.DISABLED)
+    chosen_path_entry['state'] = tk.DISABLED
     return
 
 
@@ -33,8 +60,11 @@ def submit_callback():
 
 
 def download_video(url):
+    button['state'] = tk.DISABLED
+
     try:
         yt = YouTube(url)
+        st = yt.streams.first()
 
         if yt.title == 'YouTube.mp4':
             # Restart to avoid wrong name
@@ -42,33 +72,23 @@ def download_video(url):
             return
 
         global file_size
-        file_size = yt.length
+        file_size = st.filesize
         download_path = chosen_path_entry.get()
 
         if len(download_path) == 0:
             download_path = 'downloads/'
 
+        yt.register_on_complete_callback(complete_download)
         yt.register_on_progress_callback(progress_download)
-        downloaded_yt = yt.streams.first().download(download_path)
+        downloaded_yt = st.download(download_path)
     except Exception as e:
+        button_initial_state()
         display_error()
         print(e)
         raise
 
-    yt_url_entry.delete(0, tk.END)
     file_path = os.path.join(os.getcwd(), 'downloads', downloaded_yt)
-    base, ext = os.path.splitext(file_path)
-
-    try:
-        video = VideoFileClip(file_path)
-        video.audio.write_audiofile(base + '.mp3')
-    except Exception as e:
-        display_error()
-        print(e)
-        raise
-
-    os.remove(file_path)
-    display_success()
+    convert_to_audio(file_path)
 
 
 def display_success():
@@ -87,10 +107,16 @@ def hide_error():
     error.pack_forget()
 
 
+def button_initial_state():
+    button['state'] = tk.NORMAL
+    button['text'] = 'Submit'
+
+
 root = tk.Tk()
 root.title('Youtube Downloader')
+root.geometry('500x300')
 
-canvas = tk.Canvas(root, width=CANVAS_WIDTH, height=CANVAS_HEIGHT, bg='#DBDBDB')
+canvas = tk.Canvas(root, bg='#DBDBDB')
 canvas.pack()
 
 frame = tk.Frame(root, bg='#B0B5B3')
