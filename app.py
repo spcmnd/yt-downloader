@@ -1,7 +1,8 @@
 import tkinter as tk
+import os
 from tkinter.filedialog import askdirectory
 from pytube import YouTube
-from moviepy.editor import *
+from moviepy.video.io.VideoFileClip import VideoFileClip
 from threading import Thread
 
 CANVAS_HEIGHT = 400
@@ -18,6 +19,7 @@ def convert_to_audio(file_path):
         base, ext = os.path.splitext(file_path)
         video = VideoFileClip(file_path)
         video.audio.write_audiofile(base + '.mp3')
+        video.close()
         os.remove(file_path)
     except Exception as e:
         button_initial_state()
@@ -66,7 +68,7 @@ def download_video(url):
         yt = YouTube(url)
         st = yt.streams.first()
 
-        if yt.title == 'YouTube.mp4':
+        if yt.title == 'YouTube':
             # Restart to avoid wrong name
             submit_callback()
             return
