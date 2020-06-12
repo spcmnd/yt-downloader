@@ -4,10 +4,16 @@ from tkinter.filedialog import askdirectory
 from pytube import YouTube
 from moviepy.audio.io.AudioFileClip import AudioFileClip
 from threading import Thread
+from PIL import Image, ImageTk
 
-CANVAS_HEIGHT = 400
-CANVAS_WIDTH = 500
+
+# Global variables
+background_color = '#fff'
 file_size = 0
+small_font = ('Calibri', 10)
+global_font = ('Calibri', 12)
+global_font_bold = ('Calibri', 12, 'bold')
+version_number = 'v' + str(open('VERSION', 'r').read())
 
 
 def convert_to_audio(file_path):
@@ -116,38 +122,44 @@ def button_initial_state():
 
 root = tk.Tk()
 root.title('Youtube Downloader')
-root.geometry('500x300')
+root.geometry('800x400')
 
-canvas = tk.Canvas(root, bg='#DBDBDB')
-canvas.pack()
+canvas = tk.Canvas(root, bg=background_color)
+canvas.place(relwidth=1, relheight=1)
 
-frame = tk.Frame(root, bg='#B0B5B3')
+frame = tk.Frame(root, bg=background_color)
 frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER, relwidth=0.9, relheight=0.9)
 
-error = tk.Label(frame, text='Une erreur est survenue, veuillez recommencer.', fg='red')
-success = tk.Label(frame, text='Vidéo téléchargée avec succès!', fg='green')
+error = tk.Label(frame, text='Une erreur est survenue, veuillez recommencer.', fg='red', bg='#fff', font=global_font_bold)
+success = tk.Label(frame, text='Vidéo téléchargée avec succès!', fg='green', bg='#fff', font=global_font_bold)
 
-yt_url_entry_label = tk.Label(frame, text='YouTube video URL:')
+im = Image.open('assets/youtube_icon.png').resize((115, 85))
+youtube_logo = ImageTk.PhotoImage(im)
+yt_logo_label = tk.Label(frame, image=youtube_logo, width=150, bg=background_color)
+yt_logo_label.pack(side='top', pady=(10, 0))
+
+yt_url_entry_label = tk.Label(frame, text='YouTube video URL:', bg=background_color, font=global_font_bold)
 yt_url_entry_label.pack(side='top', pady=(10, 0))
 
-yt_url_entry = tk.Entry(frame, width=25)
-yt_url_entry.pack(side='top', pady=10)
+yt_url_entry = tk.Entry(frame, font=global_font)
+yt_url_entry.pack(side='top', pady=10, padx=10, fill=tk.X)
 
-chosen_path_entry_label = tk.Label(frame, text='Destination:')
+chosen_path_entry_label = tk.Label(frame, text='Destination:', bg=background_color, font=global_font_bold)
 chosen_path_entry_label.pack(side='top', pady=(10, 0))
 
-chosen_path_frame = tk.Frame(frame, bg='#B0B5B3')
-chosen_path_frame.pack(side='top')
+chosen_path_frame = tk.Frame(frame, bg=background_color)
+chosen_path_frame.pack(side='top', fill=tk.X, padx=10)
 
-chosen_path_entry = tk.Entry(chosen_path_frame, width=15, state=tk.DISABLED)
-chosen_path_entry.pack(side='left', pady=10)
+chosen_path_entry = tk.Entry(chosen_path_frame, state=tk.DISABLED, font=global_font)
+chosen_path_entry.pack(side='left', pady=10, fill=tk.X, expand=True)
 
-chosen_path_button = tk.Button(chosen_path_frame, text='Parcourir...', command=dest_path_callback)
+chosen_path_button = tk.Button(chosen_path_frame, text='Parcourir...', command=dest_path_callback, font=global_font, fg='#fff', bg='#FF0000')
 chosen_path_button.pack(side='right', padx=(5, 0))
 
-progress_label = tk.Label(frame)
-
-button = tk.Button(frame, text='Submit', command=submit_callback)
+button = tk.Button(frame, text='Submit', command=submit_callback, fg='#fff', bg='#FF0000', font=global_font)
 button.pack(side='bottom', pady=(0, 10))
+
+version_number_label = tk.Label(root, bg='#fff', font=small_font, text=version_number)
+version_number_label.place(rely=1.0, relx=1.0, x=-10, y=-5, anchor=tk.SE)
 
 root.mainloop()
