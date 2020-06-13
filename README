@@ -8,3 +8,11 @@ try:
 except Exception: 
 	cipher_url = [ parse_qs(formats[i]["cipher"]) for i, data in enumerate(formats) ]
 ```
+
+## Deploy a new version
+
+Script in console :
+
+```
+pyinstaller .\app.py --add-data "assets/;assets/" --add-data "VERSION;."
+```
